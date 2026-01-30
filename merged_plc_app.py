@@ -277,7 +277,12 @@ def show_matrix_page():
 
     # Export test matrix button
     if st.button('Export test matrix'):
-        export_path = 'Test Matrix.xlsx'
+        import os
+        
+        # Get the Downloads folder path
+        downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+        export_path = os.path.join(downloads_path, 'Test Matrix.xlsx')
+        
         # Use XlsxWriter for better formatting
         with pd.ExcelWriter(export_path, engine='xlsxwriter') as writer:
             # Write data starting from row 2 and column 2 to leave space for master headings
