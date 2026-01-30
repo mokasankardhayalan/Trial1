@@ -278,13 +278,14 @@ def show_matrix_page():
     # Export test matrix button
     if st.button('Export test matrix'):
         import os
+        import tempfile
         
-        # Get the Downloads folder path
-        downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
-        export_path = os.path.join(downloads_path, 'Test Matrix.xlsx')
+        # Create a temporary file for the Excel export
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+            temp_path = tmp_file.name
         
         # Use XlsxWriter for better formatting
-        with pd.ExcelWriter(export_path, engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(temp_path, engine='xlsxwriter') as writer:
             # Write data starting from row 2 and column 2 to leave space for master headings
             result_df.to_excel(writer, sheet_name='Matrix', index=True, startrow=2, startcol=1)
             workbook  = writer.book
@@ -386,7 +387,21 @@ def show_matrix_page():
                 current_width = max(30, max_check_length + 5)
                 worksheet.set_column(0, 0, current_width)
 
-        st.success(f'Test matrix exported to {export_path}')
+        # Read the file content for download
+        with open(temp_path, 'rb') as f:
+            excel_data = f.read()
+        
+        # Clean up the temporary file
+        os.unlink(temp_path)
+        
+        # Provide download button
+        st.download_button(
+            label="📥 Download Test Matrix",
+            data=excel_data,
+            file_name="Test_Matrix.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        st.success('Test matrix is ready for download!')
 
     # Add legend below the table - dynamically generated from Excel colors
     legend_html = "<div style='margin-top:20px;'><b>Legend:</b><br>"
